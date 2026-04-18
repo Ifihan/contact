@@ -34,6 +34,9 @@ class Contact(db.Model):
     phone = db.Column(db.String(50))
     email = db.Column(db.String(50))
     location = db.Column(db.String(100))
+    owner = db.relationship('User', backref='contact')
+
+    def __init__(self, name, email, phone, location, owner):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __init__(self, name, email, phone, location, user_id):
@@ -41,6 +44,7 @@ class Contact(db.Model):
         self.email = email
         self.phone = phone
         self.location = location
+        self.owner = owner
         self.user_id = user_id
 
 @login_manager.user_loader
@@ -109,6 +113,15 @@ def dashboard():
 @app.route('/insert', methods = ['POST'])
 @login_required
 def insert():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+        location = request.form['location']
+
+        my_data = Contact(name, email, phone, location, (owner=request.user))
+        db.session.add(my_data)
+        db.session.commit()
     print(session)
     name = request.form['name']
     email = request.form['email']
